@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.wmods.wppenhacer.xposed.core.WppCore;
 import com.wmods.wppenhacer.xposed.utils.ReflectionUtils;
 import com.wmods.wppenhacer.xposed.utils.Utils;
+import com.wmods.wppenhacer.BuildConfig;
 
 import org.luckypray.dexkit.DexKitBridge;
 import org.luckypray.dexkit.query.FindClass;
@@ -62,7 +63,28 @@ public class Unobfuscator {
     public static final HashMap<String, Object> cache = new HashMap<>();
 
     static {
-        System.loadLibrary("dexkit");
+        // System.loadLibrary("dexkit");
+        System.load(getApplication().getPackageManager().getApplicationInfo(BuildConfig.APPLICATION_ID,0).nativeLibraryDir+"/libdexkit.so");
+    }
+
+    public static Application getApplication() {
+        try {
+            // Load the AppGlobals class using reflection
+            Class<?> appGlobalsClass = Class.forName("android.app.AppGlobals");
+
+            // Get the getInitialApplication method
+            Method getInitialApplicationMethod = appGlobalsClass.getMethod("getInitialApplication");
+
+            // Invoke the method (AppGlobals is a static class, so invoke with null)
+            Object initialApplicationObject = getInitialApplicationMethod.invoke(null);
+
+            // Cast the result to Application
+            return (Application) initialApplicationObject;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Or handle the error appropriately
+        }
     }
 
     public static boolean initWithPath(String path) {
